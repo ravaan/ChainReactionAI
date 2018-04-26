@@ -50,11 +50,27 @@ public class Board {
 		}
 	}
 
-	//Returns the board. Not used anywhere.
+	//Returns the board.
 	int[][] getBoard(){
 		return b;
 	}
-
+	
+	void setBoard(int[][] board){
+		b=board;
+	}
+	int get_plus_count(){
+		return plus_count;
+	}
+	int get_minus_count(){
+		return minus_count;
+	}
+	void set_plus_count(int pl){
+		plus_count = pl;
+	}
+	void set_minus_count(int mi){
+		minus_count = mi;
+	}
+	
 	//Prints the board
 	void printBoard(){ 
 		System.out.print("\n\t\t\tBOARD");
