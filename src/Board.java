@@ -153,19 +153,35 @@ public class Board {
 		case CORNER:
 			if(row==0 && col==0){
 				makeMove(row,col+1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row+1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			else if(row==0 && col==c){
 				makeMove(row,col-1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row+1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			else if(row==r && col==0){
 				makeMove(row,col+1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row-1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			else if(row==r && col==c){
 				makeMove(row,col-1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row-1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			break;
 		case SIDE:

@@ -5,18 +5,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-/* Shit i want to do:
- * 1. An infinite undo button (reverse chain reaction) [is any information lost while chain reacting?]
- * 2. If yes, use a movelog to do the undos.
- * 3. Store game data in a file to reload as and when required.
- * 4. Analyze game data in a file to understand blunders and so on using board evaluation
- * 5. How does dimensions affect play?
- */
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.StringTokenizer;
 
 public class Driver {
+	
+/* Shit  I wanna do:
+ * 1. Enforce connectedness as good
+ * 2. Enforce chains of explosions as good,provided not in danger.
+ * 3. Ignore squares which are not at distance 1 or 2 from enemy or distance 1 from yourself.
+ * 4. Enforce compact connectedness as better than lean connectedness
+ * 5. Try learning heuristic with simulations
+
+ * 1. An infinite undo button (reverse chain reaction) [is any information lost while chain reacting?]
+ * 2. If yes, use a movelog to do the undos.
+ * 3. Reload games as and when required.
+ * 4. Analyze game data in a file to understand blunders and so on using board evaluation
+ * 5. How does dimensions affect play?
+ */
 	//IO Code
 	static BufferedWriter writer;
 	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -34,7 +43,8 @@ public class Driver {
 			System.out.println("\n*****************CHAIN REACTION************");
 			System.out.println("1. Start new game");
 			System.out.println("2. Load a game");
-			System.out.println("3. Exit");
+			System.out.println("3. Simulate a game");
+			System.out.println("4. Exit");
 			System.out.println("*******************************************");
 			System.out.print("\n\n Enter choice(1,2,3): ");
 			try{
@@ -51,13 +61,83 @@ public class Driver {
 			case 2:
 				loadGame();
 				break;
-			case 3: 
+			case 3:
+				simulateGame(9,6);
+				break;
+			case 4: 
 				exit =true;
 				break;
 			default: System.out.println("Error: Invalid Choice! \n");
 			}
 		}while(!exit);
 		System.out.println("Exiting...");
+	}
+
+	private static void simulateGame(int row_dim,int col_dim) throws NumberFormatException, IOException {
+		System.out.print("Player 1 is (0-random)(1-smart): ");
+		int p1_type = Integer.parseInt(br.readLine());
+		System.out.print("Player 2 is (0-random)(1-smart): ");
+		int p2_type = Integer.parseInt(br.readLine());
+		Board b=new Board(row_dim,col_dim);
+		int[] choices = new int[row_dim*col_dim];
+		int r_1=1,c_1=1,p=-1,move=0,r=0,c=0;
+		boolean exit=false;
+		ArrayList<Integer> movelog = new ArrayList<Integer>();
+		int moves=movelog.size();
+		AI robo=null;
+		if(p1_type==1 || p2_type==1)
+			robo = new AI();
+				
+		for(int i=0;i<choices.length;i++){
+			if(c_1==7){
+				c_1=1;
+				r_1++;
+			}
+			choices[i] = r_1*10 + c_1;
+			c_1++;
+		}
+
+		//The turn keeps alternating due to changes made to p. Each run of the loop represents half a move
+		do{ 
+			p=p*(-1);
+			//Right now, only handling random player cases
+			if((p1_type==0 && p==1) || (p2_type==0 && p==-1))
+				move = choices[new Random().nextInt(choices.length)];
+			else if((p1_type==1 && p==1) || (p2_type==0 && p==-1))
+				move = robo.findBestMove(b.getBoard(), row_dim, col_dim, p);
+						
+			//Get row index
+			r = move/10; 
+			//Get column index
+			c = move%10; 
+
+			//Check if square is already occupied. Invalid in case of a direct move
+			if(b.isOccupied(r-1,c-1,p)) {
+				p=p*(-1);	
+				continue;
+			}
+
+			//Make the move
+			b.makeMove(r-1,c-1,p);
+
+			//Move has occurred at this point, so increment moves
+			moves++;
+			System.out.println("MOVE: "+moves+": "+move);
+			System.out.println("MOVELOG: "+movelog);
+			movelog.ensureCapacity(moves);
+			movelog.add(move);
+
+			//Check for victory after one turn cycle
+			if(b.testVictory(p) && moves>2){ 
+				System.out.println("Player "+(int)(p*(-0.5)+1.5)+" WINS!\n\n");
+				exit=true;
+				b.printBoard();
+				System.out.println(movelog);
+				continue;
+			}
+		}while(!exit);
+		
+		
 	}
 
 	//Load a game. Not working currently
