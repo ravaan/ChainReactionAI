@@ -13,18 +13,21 @@ import java.util.StringTokenizer;
 
 public class Driver {
 	
-/* Shit  I wanna do:
+/* Shit I wanna do:
  * 1. Enforce connectedness as good
  * 2. Enforce chains of explosions as good,provided not in danger.
  * 3. Ignore squares which are not at distance 1 or 2 from enemy or distance 1 from yourself.
  * 4. Enforce compact connectedness as better than lean connectedness
  * 5. Try learning heuristic with simulations
+ * 6. Enforce wall of ones concept
 
+NOTE: If I incentivize explosives, and I incentivize adjacency, have I incentivized adjacent explosives?
  * 1. An infinite undo button (reverse chain reaction) [is any information lost while chain reacting?]
  * 2. If yes, use a movelog to do the undos.
  * 3. Reload games as and when required.
  * 4. Analyze game data in a file to understand blunders and so on using board evaluation
  * 5. How does dimensions affect play?
+ * 6. GUI for Board
  */
 	//IO Code
 	static BufferedWriter writer;
@@ -38,7 +41,9 @@ public class Driver {
 		boolean exit=false;
 		int choice;
 
-
+		int pos;
+		
+		
 		do{
 			System.out.println("\n*****************CHAIN REACTION************");
 			System.out.println("1. Start new game");
@@ -74,6 +79,9 @@ public class Driver {
 	}
 
 	private static void simulateGame(int row_dim,int col_dim) throws NumberFormatException, IOException {
+		int k=0;
+		int pos=0;
+		
 		System.out.print("Player 1 is (0-random)(1-smart): ");
 		int p1_type = Integer.parseInt(br.readLine());
 		System.out.print("Player 2 is (0-random)(1-smart): ");
@@ -84,9 +92,7 @@ public class Driver {
 		boolean exit=false;
 		ArrayList<Integer> movelog = new ArrayList<Integer>();
 		int moves=movelog.size();
-		AI robo=null;
-		if(p1_type==1 || p2_type==1)
-			robo = new AI();
+		AI robo=new AI();
 				
 		for(int i=0;i<choices.length;i++){
 			if(c_1==7){
@@ -104,7 +110,7 @@ public class Driver {
 			if((p1_type==0 && p==1) || (p2_type==0 && p==-1))
 				move = choices[new Random().nextInt(choices.length)];
 			else if((p1_type==1 && p==1) || (p2_type==0 && p==-1))
-				move = robo.findBestMove(b.getBoard(), row_dim, col_dim, p);
+				move = robo.findBestMove(b, row_dim, col_dim, p);
 						
 			//Get row index
 			r = move/10; 
@@ -119,20 +125,26 @@ public class Driver {
 
 			//Make the move
 			b.makeMove(r-1,c-1,p);
-
+			//b.printBoard();
+			k=robo.evaluate(b, Math.abs(p));
+			if(k>0)
+				pos++;
 			//Move has occurred at this point, so increment moves
 			moves++;
-			System.out.println("MOVE: "+moves+": "+move);
-			System.out.println("MOVELOG: "+movelog);
+			//System.out.println("MOVE: "+moves+": "+move);
+			//System.out.println("MOVELOG: "+movelog);
 			movelog.ensureCapacity(moves);
 			movelog.add(move);
 
 			//Check for victory after one turn cycle
 			if(b.testVictory(p) && moves>2){ 
 				System.out.println("Player "+(int)(p*(-0.5)+1.5)+" WINS!\n\n");
+				System.out.println("Move count: "+moves);
 				exit=true;
 				b.printBoard();
 				System.out.println(movelog);
+				double prob =(double)pos/moves;
+				System.out.println("Probability of winning for p=1 was "+prob);
 				continue;
 			}
 		}while(!exit);

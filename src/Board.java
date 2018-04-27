@@ -50,9 +50,16 @@ public class Board {
 		}
 	}
 
-	//Returns the board.
 	int[][] getBoard(){
 		return b;
+	}
+	
+	Type get_type(int i,int j){
+		return type[i][j];
+	}
+	
+	boolean[][] get_primed(){
+		return primed;
 	}
 	
 	void setBoard(int[][] board){
