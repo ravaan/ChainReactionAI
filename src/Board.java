@@ -50,11 +50,34 @@ public class Board {
 		}
 	}
 
-	//Returns the board. Not used anywhere.
 	int[][] getBoard(){
 		return b;
 	}
-
+	
+	Type get_type(int i,int j){
+		return type[i][j];
+	}
+	
+	boolean[][] get_primed(){
+		return primed;
+	}
+	
+	void setBoard(int[][] board){
+		b=board;
+	}
+	int get_plus_count(){
+		return plus_count;
+	}
+	int get_minus_count(){
+		return minus_count;
+	}
+	void set_plus_count(int pl){
+		plus_count = pl;
+	}
+	void set_minus_count(int mi){
+		minus_count = mi;
+	}
+	
 	//Prints the board
 	void printBoard(){ 
 		System.out.print("\n\t\t\tBOARD");
@@ -137,19 +160,35 @@ public class Board {
 		case CORNER:
 			if(row==0 && col==0){
 				makeMove(row,col+1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row+1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			else if(row==0 && col==c){
 				makeMove(row,col-1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row+1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			else if(row==r && col==0){
 				makeMove(row,col+1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row-1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			else if(row==r && col==c){
 				makeMove(row,col-1,p);
+				if(testVictory(p))
+					break;
 				makeMove(row-1,col,p);
+				if(testVictory(p))
+					break;
 			}
 			break;
 		case SIDE:
